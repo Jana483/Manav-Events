@@ -1,0 +1,82 @@
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --primary: #5b1a9e;
+  --primary-dark: #44127a;
+  --accent: #a0144f;
+  --text: #1a1a1a;
+  --muted: #4a4a4a;
+  --bg: #faf7f2;
+  --card: #ffffff;
+  --border: #c9c9c9;
+  --error: #b00020;
+  --focus: #ffbf47;
+}
+body { margin: 0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; font-size: 1rem;
+       line-height: 1.5; background: var(--bg); color: var(--text); }
+.skip-link { position: absolute; left: -9999px; top: 0; background: #000; color: #fff;
+             padding: 10px 16px; z-index: 100; }
+.skip-link:focus { left: 8px; top: 8px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+                   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.site-header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff;
+               padding: 28px 20px; text-align: center; }
+.site-header h1 { margin: 0; font-size: 2rem; }
+.site-header p { margin: 6px 0 0; }
+main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+main:focus { outline: none; }
+.site-footer { text-align: center; color: var(--muted); padding: 20px; }
+
+.card { background: var(--card); border-radius: 14px; padding: 18px 20px; margin: 16px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.card h2, .card h3 { margin-top: 0; color: var(--primary); }
+.hint { color: var(--muted); font-size: .875rem; margin: 4px 0 0; }
+.req { color: var(--error); }
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.full { grid-column: 1 / -1; }
+label { font-weight: 600; }
+input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+                          font: inherit; color: var(--text); background: #fff; }
+textarea { min-height: 80px; resize: vertical; }
+[aria-invalid="true"] { border: 2px solid var(--error); }
+
+button { font: inherit; cursor: pointer; border-radius: 10px; }
+.primary { padding: 14px; border: 0; background: var(--primary); color: #fff; font-size: 1.05rem; font-weight: 700; }
+.primary:hover { background: var(--primary-dark); }
+.primary:disabled { opacity: .65; cursor: progress; }
+.secondary { padding: 10px 16px; border: 2px solid var(--primary); background: #fff; color: var(--primary); font-weight: 600; }
+
+.status { margin: 16px 0; font-weight: 600; text-align: center; min-height: 1.5em; }
+.error { background: #fdecee; color: var(--error); border: 1px solid var(--error); border-radius: 10px;
+         padding: 12px 16px; margin: 16px 0; }
+.error p { margin: 0 0 6px; font-weight: 700; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border-bottom: 1px solid #e3e3e3; text-align: left; vertical-align: top; }
+thead th { background: #f3edfb; }
+meter { width: 80px; vertical-align: middle; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.vendor { border: 1px solid #e3e3e3; border-radius: 10px; padding: 12px; }
+.vendor h4 { margin: 0 0 4px; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .8rem;
+        background: #ece0fa; color: var(--primary-dark); margin-left: 6px; font-weight: 600; }
+.checklist { list-style: none; padding-left: 0; }
+.checklist li { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0; }
+.checklist label { font-weight: 400; }
+.checklist input { width: 1.1rem; height: 1.1rem; margin-top: 3px; }
+.timeline li { margin-bottom: 12px; }
+.muted { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media print {
+  .site-header { background: none; color: #000; }
+  #plan-form, #print-btn, .status, .skip-link, .site-footer, #form-title, .hint { display: none; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+}
