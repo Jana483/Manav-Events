@@ -15,7 +15,7 @@ import re
 import time
 from collections import OrderedDict, defaultdict, deque
 from threading import Lock
-from typing import Any
+from typing import TYPE_CHECKING, Any, TypeGuard
 
 from flask import Flask, Response, jsonify, render_template, request
 
@@ -41,16 +41,16 @@ MAX_DAYS_AHEAD = 365 * 3
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 _CODE_FENCE = re.compile(r"^```(?:json)?\s*|\s*```$")
 
-CONTENT_SECURITY_POLICY = "; ".join([
-    "default-src 'self'",
-    "script-src 'self'",
-    "style-src 'self'",
-    "img-src 'self' data:",
-    "connect-src 'self'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-])
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self'; "
+    "style-src 'self'; "
+    "img-src 'self' data:; "
+    "connect-src 'self'; "
+    "base-uri 'self'; "
+    "form-action 'self'; "
+    "frame-ancestors 'none'"
+)
 
 PLAN_SCHEMA = """{
   "summary": "2-3 sentence overview of the plan",
@@ -156,11 +156,14 @@ class RateLimiter:
 plan_cache = LRUCache(CACHE_SIZE)
 rate_limiter = RateLimiter(RATE_LIMIT_PER_MINUTE)
 
-_client = None
+if TYPE_CHECKING:
+    from google import genai
+
+_client: genai.Client | None = None
 _client_lock = Lock()
 
 
-def get_client():
+def get_client() -> genai.Client:
     """Create the Gemini client lazily so startup is fast and tests need no credentials."""
     global _client
     if _client is None:
@@ -224,8 +227,8 @@ def validate_input(data: Any, today: dt.date | None = None) -> dict[str, Any]:
 
     texts = {field: _clean_text(data.get(field), field, errors) for field in TEXT_LIMITS}
 
-    if errors:
-        raise ValidationError(errors)
+    if errors or event_date is None:
+        raise ValidationError(errors or ["event_date is required."])
     return {
         "event_type": event_type,
         "event_date": event_date.isoformat(),
@@ -271,7 +274,7 @@ def _as_dict(value: Any) -> dict:
     return value if isinstance(value, dict) else {}
 
 
-def _is_number(value: Any) -> bool:
+def _is_number(value: Any) -> TypeGuard[int | float]:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
@@ -392,7 +395,8 @@ def create_plan() -> tuple[Response, int] | Response:
     try:
         plan, from_cache = generate_plan(plan_input)
     except PlanGenerationError:
-        logger.exception("Plan generation failed")  # details stay in logs, not in the response
+        # Details stay in logs, not in the response.
+        logger.exception("Plan generation failed")
         return jsonify(error="We could not generate a plan right now. Please try again."), 502
 
     logger.info("Plan generated type=%s guests=%s cached=%s",

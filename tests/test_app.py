@@ -304,3 +304,27 @@ def test_rate_limiter_window_resets():
     assert limiter.allow("ip", now=30) is False
     assert limiter.allow("ip", now=61) is True
     assert limiter.allow("other-ip", now=30) is True
+
+
+def test_rate_limiter_disabled_when_limit_is_zero():
+    import app as app_module
+
+    limiter = app_module.RateLimiter(0)
+    assert all(limiter.allow("1.2.3.4") for _ in range(100))
+
+
+def test_get_client_creates_vertex_client_once(monkeypatch):
+    from unittest.mock import MagicMock, patch
+
+    import app as app_module
+
+    monkeypatch.setattr(app_module, "_client", None)
+    fake = MagicMock(name="genai_client")
+    with patch("google.genai.Client", return_value=fake) as mock_cls:
+        first = app_module.get_client()
+        second = app_module.get_client()
+    assert first is fake
+    assert second is fake
+    mock_cls.assert_called_once_with(
+        vertexai=True, project=app_module.PROJECT, location=app_module.LOCATION
+    )
